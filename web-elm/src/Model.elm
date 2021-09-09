@@ -291,7 +291,7 @@ type State
     | Loading { names : Set String, loaded : Dict String Image }
     | ViewImgs { images : Pivot Image }
     | Config { images : Pivot Image }
-    | Registration { images : Pivot Image }
+    | Results { images : Pivot Image }
     | Logs { images : Pivot Image }
     | Lighting { sources : Maybe (Pivot Point3D), dirs : Maybe (Pivot Point3D), images : Pivot Image }
 
@@ -412,7 +412,7 @@ type ViewImgMsg
 type NavigationMsg
     = GoToPageImages
     | GoToPageConfig
-    | GoToPageRegistration
+    | GoToPageResults
     | GoToPageLogs
     | GoToPageLighting
 
@@ -420,6 +420,6 @@ type NavigationMsg
 type PageHeader
     = PageImages
     | PageConfig
-    | PageRegistration
+    | PageResults
     | PageLogs
     | PageLighting

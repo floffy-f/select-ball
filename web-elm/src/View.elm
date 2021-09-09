@@ -57,8 +57,8 @@ viewElmUI model =
         Config { images } ->
             viewConfig model
 
-        Registration { images } ->
-            viewRegistration model
+        Results { images } ->
+            viewResults model
 
         Logs { images } ->
             viewLogs model
@@ -145,15 +145,15 @@ pageHeaderElement current page =
                 , label = Element.text "Config"
                 }
 
-        PageRegistration ->
+        PageResults ->
             Element.Input.button attributes
                 { onPress =
                     if current then
                         Nothing
 
                     else
-                        Just (NavigationMsg GoToPageRegistration)
-                , label = Element.text "Registration"
+                        Just (NavigationMsg GoToPageResults)
+                , label = Element.text "Results"
                 }
 
         PageLogs ->
@@ -321,7 +321,7 @@ viewLogs ({ autoscroll, verbosity, logs } as model) =
         [ headerBar
             [ ( PageImages, False )
             , ( PageConfig, False )
-            , ( PageRegistration, False )
+            , ( PageResults, False )
             , ( PageLogs, True )
             , ( PageLighting, False )
             ]
@@ -469,7 +469,7 @@ viewConfig ({ params, paramsForm, paramsInfo } as model) =
         [ headerBar
             [ ( PageImages, False )
             , ( PageConfig, True )
-            , ( PageRegistration, False )
+            , ( PageResults, False )
             , ( PageLogs, False )
             , ( PageLighting, False )
             ]
@@ -490,7 +490,7 @@ viewConfig ({ params, paramsForm, paramsInfo } as model) =
                             , label = Element.Input.labelHidden "Show detail info about cropped working frame"
                             }
                         ]
-                    , moreInfo paramsInfo.crop "Instead of using the whole image to estimate the registration, it is often faster and as accurate to focus the algorithm attention on a smaller frame in the image. The parameters here are the left, top, right and bottom coordinates of that cropped frame on which we want the algorithm to focus when estimating the alignment parameters."
+                    , moreInfo paramsInfo.crop "Size of the rectangle traced to shape the first of the four selection circles."
                     , Element.row [ spacing 10 ]
                         [ Element.text "off"
                         , toggle (ParamsMsg << ToggleCrop) paramsForm.crop.active 30 "Toggle cropped working frame"
@@ -545,13 +545,13 @@ viewConfig ({ params, paramsForm, paramsInfo } as model) =
                     [ Element.row [ spacing 10 ]
                         [ Element.text "Circular ray of the mask for lobe detection"
                         , Element.Input.checkbox []
-                            { onChange = ParamsInfoMsg << ToggleInfoSigma
+                            { onChange = ParamsInfoMsg << ToggleInfoMaskRay
                             , icon = infoIcon
                             , checked = paramsInfo.maskRay
                             , label = Element.Input.labelHidden "Show detail info about the mask ray"
                             }
                         ]
-                    , moreInfo paramsInfo.sigma "Before it appears to the screen, the ball is masked with a rectangular black layer, with a hole of a chosen ray. The smaller the ray, the greater the chance to avoid double specular lobes, but also the greater the chance to miss the OG lobe"
+                    , moreInfo paramsInfo.maskRay "Before it appears to the screen, the ball is masked with a rectangular black layer, with a hole of a chosen ray. The smaller the ray, the greater the chance to avoid double specular lobes, but also the greater the chance to miss the OG lobe"
                     , Element.text ("(default to " ++ String.fromFloat defaultParams.maskRay ++ " < 1.0)")
                     , floatInput paramsForm.maskRay (ParamsMsg << ChangeMaskRay) "maskRay"
                     , displayFloatErrors paramsForm.maskRay.decodedInput
@@ -579,11 +579,11 @@ viewConfig ({ params, paramsForm, paramsInfo } as model) =
 
 
 
--- Registration view
+-- Results view
 
 
-viewRegistration : Model -> Element Msg
-viewRegistration ({ registeredImages, registeredViewer, registeredCenters } as model) =
+viewResults : Model -> Element Msg
+viewResults ({ registeredImages, registeredViewer, registeredCenters } as model) =
     let
         littlechunk :
             ({ tl : Maybe (Pivot { x : Int, y : Int })
@@ -724,7 +724,7 @@ viewRegistration ({ registeredImages, registeredViewer, registeredCenters } as m
             case registeredImages.tl of
                 Nothing ->
                     Element.el [ centerX, centerY, Element.Border.dotted, Element.Border.width 3, height (fillPortion 2), width (fillPortion 2) ]
-                        (Element.text "Registration not done yet")
+                        (Element.text "Results not done yet")
 
                 Just images ->
                     littlechunk .tl .tl TopLeft images
@@ -734,7 +734,7 @@ viewRegistration ({ registeredImages, registeredViewer, registeredCenters } as m
             case registeredImages.tr of
                 Nothing ->
                     Element.el [ centerX, centerY, Element.Border.dotted, Element.Border.width 3, height (fillPortion 2), width (fillPortion 2) ]
-                        (Element.text "Registration not done yet")
+                        (Element.text "Results not done yet")
 
                 Just images ->
                     littlechunk .tr .tr TopRight images
@@ -744,7 +744,7 @@ viewRegistration ({ registeredImages, registeredViewer, registeredCenters } as m
             case registeredImages.bl of
                 Nothing ->
                     Element.el [ centerX, centerY, Element.Border.dotted, Element.Border.width 3, height (fillPortion 2), width (fillPortion 2) ]
-                        (Element.text "Registration not done yet")
+                        (Element.text "Results not done yet")
 
                 Just images ->
                     littlechunk .bl .bl BottomLeft images
@@ -754,7 +754,7 @@ viewRegistration ({ registeredImages, registeredViewer, registeredCenters } as m
             case registeredImages.br of
                 Nothing ->
                     Element.el [ centerX, centerY, Element.Border.dotted, Element.Border.width 3, height (fillPortion 2), width (fillPortion 2) ]
-                        (Element.text "Registration not done yet")
+                        (Element.text "Results not done yet")
 
                 Just images ->
                     littlechunk .br .br BottomRight images
@@ -776,7 +776,7 @@ viewRegistration ({ registeredImages, registeredViewer, registeredCenters } as m
         [ headerBar
             [ ( PageImages, False )
             , ( PageConfig, False )
-            , ( PageRegistration, True )
+            , ( PageResults, True )
             , ( PageLogs, False )
             , ( PageLighting, False )
             ]
@@ -845,7 +845,7 @@ viewLighting model ({ sources, dirs, images } as lightingData) =
         [ headerBar
             [ ( PageImages, False )
             , ( PageConfig, False )
-            , ( PageRegistration, False )
+            , ( PageResults, False )
             , ( PageLogs, False )
             , ( PageLighting, True )
             ]
@@ -1472,7 +1472,7 @@ viewImgs ({ pointerMode, bboxesDrawn, viewer } as model) images =
         [ headerBar
             [ ( PageImages, True )
             , ( PageConfig, False )
-            , ( PageRegistration, False )
+            , ( PageResults, False )
             , ( PageLogs, False )
             , ( PageLighting, False )
             ]
@@ -1581,13 +1581,13 @@ viewTitle =
         [ Element.paragraph [ Element.Font.center, Element.Font.size 32 ] [ Element.text "Stereophotometry calibration" ]
         , Element.row [ alignRight, spacing 8 ]
             [ Element.link [ Element.Font.underline ]
-                { url = "https://github.com/mpizenberg/lowrr", label = Element.text "code on GitHub" }
+                { url = "https://github.com/floffy-f/select-ball", label = Element.text "code on GitHub" }
             , Element.el [] Element.none
             , Icon.github 16
             ]
         , Element.row [ alignRight, spacing 8 ]
             [ Element.link [ Element.Font.underline ]
-                { url = "https://hal.archives-ouvertes.fr/hal-03172399", label = Element.text "read the paper" }
+                { url = "https://hal.archives-ouvertes.fr/tel-01261526/", label = Element.text "read the paper" }
             , Element.el [] Element.none
             , Icon.fileText 16
             ]

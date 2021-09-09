@@ -120,7 +120,7 @@ subscriptions model =
         Config _ ->
             Sub.batch [ resizes WindowResizes, log Log, receiveCroppedImages ReceiveCroppedImages, receiveCenters ReceiveCenters, receiveLightDirs ReceiveLightDirs, receiveLightSources ReceiveLightSources, updateRunStep UpdateRunStep ]
 
-        Registration _ ->
+        Results _ ->
             Sub.batch [ resizes WindowResizes, log Log, receiveCroppedImages ReceiveCroppedImages, receiveCenters ReceiveCenters, receiveLightDirs ReceiveLightDirs, receiveLightSources ReceiveLightSources, updateRunStep UpdateRunStep, Keyboard.downs KeyDown ]
 
         Logs _ ->
@@ -230,7 +230,7 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ( KeyDown rawKey, Registration _ ) ->
+        ( KeyDown rawKey, Results _ ) ->
             let
                 oldRegisteredViewer =
                     model.registeredViewer
@@ -299,7 +299,7 @@ update msg model =
         ( NavigationMsg navMsg, Config data ) ->
             ( goTo navMsg model data, Cmd.none )
 
-        ( NavigationMsg navMsg, Registration data ) ->
+        ( NavigationMsg navMsg, Results data ) ->
             ( goTo navMsg model data, Cmd.none )
 
         ( NavigationMsg navMsg, Logs data ) ->
@@ -311,7 +311,7 @@ update msg model =
         ( ZoomMsg zoomMsg, ViewImgs _ ) ->
             ( { model | viewer = zoomViewer zoomMsg model.viewer }, Cmd.none )
 
-        ( ZoomMsg zoomMsg, Registration _ ) ->
+        ( ZoomMsg zoomMsg, Results _ ) ->
             ( { model | registeredViewer = zoomViewerReg zoomMsg model.registeredViewer }, Cmd.none )
 
         ( PointerMsg pointerMsg, ViewImgs { images } ) ->
@@ -770,7 +770,7 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        ( PointerMsg pointerMsg, Registration _ ) ->
+        ( PointerMsg pointerMsg, Results _ ) ->
             case ( pointerMsg, model.pointerMode ) of
                 -- Moving the viewer
                 ( PointerDownRaw event, WaitingMove ) ->
@@ -841,7 +841,7 @@ update msg model =
         ( ClickPreviousImage, ViewImgs { images } ) ->
             ( { model | state = ViewImgs { images = goToPreviousImage images } }, Cmd.none )
 
-        ( ClickPreviousImage, Registration _ ) ->
+        ( ClickPreviousImage, Results _ ) ->
             ( { model
                 | registeredImages = goToPreviousImageReg model.registeredImages
                 , registeredCenters = goToPreviousCenterReg model.registeredCenters
@@ -861,7 +861,7 @@ update msg model =
         ( ClickNextImage, ViewImgs { images } ) ->
             ( { model | state = ViewImgs { images = goToNextImage images } }, Cmd.none )
 
-        ( ClickNextImage, Registration _ ) ->
+        ( ClickNextImage, Results _ ) ->
             ( { model
                 | registeredImages = goToNextImageReg model.registeredImages
                 , registeredCenters = goToNextCenterReg model.registeredCenters
@@ -884,7 +884,7 @@ update msg model =
         ( RunAlgorithm params, Config imgs ) ->
             ( { model | state = Logs imgs, registeredImages = { tl = Nothing, tr = Nothing, bl = Nothing, br = Nothing }, runStep = StepNotStarted }, run (encodeParams params) )
 
-        ( RunAlgorithm params, Registration imgs ) ->
+        ( RunAlgorithm params, Results imgs ) ->
             ( { model | state = Logs imgs, registeredImages = { tl = Nothing, tr = Nothing, bl = Nothing, br = Nothing }, runStep = StepNotStarted }, run (encodeParams params) )
 
         ( RunAlgorithm params, Logs imgs ) ->
@@ -1066,8 +1066,8 @@ update msg model =
 
         ( ReceiveLightDirs directions, _ ) ->
             let
-                registrations : Maybe (Pivot Model.Point3D)
-                registrations =
+                results : Maybe (Pivot Model.Point3D)
+                results =
                     case directions of
                         [] ->
                             Nothing
@@ -1076,15 +1076,15 @@ update msg model =
                             Just (Pivot.fromCons firstDir otherDirs)
             in
             ( { model
-                | registeredLightDirs = registrations
+                | registeredLightDirs = results
               }
             , Cmd.none
             )
 
         ( ReceiveLightSources sources, _ ) ->
             let
-                registrations : Maybe (Pivot Model.Point3D)
-                registrations =
+                results : Maybe (Pivot Model.Point3D)
+                results =
                     case sources of
                         [] ->
                             Nothing
@@ -1093,7 +1093,7 @@ update msg model =
                             Just (Pivot.fromCons firstSource otherSources)
             in
             ( { model
-                | registeredLightSources = registrations
+                | registeredLightSources = results
               }
             , Cmd.none
             )
@@ -1421,8 +1421,8 @@ goTo msg model data =
         GoToPageConfig ->
             { model | state = Config data }
 
-        GoToPageRegistration ->
-            { model | state = Registration data, pointerMode = WaitingMove }
+        GoToPageResults ->
+            { model | state = Results data, pointerMode = WaitingMove }
 
         GoToPageLogs ->
             { model | state = Logs data }
