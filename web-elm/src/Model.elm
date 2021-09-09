@@ -209,7 +209,7 @@ defaultParams =
         , bottomRight = Nothing
         }
     , maxVerbosity = 3
-    , sigma = 1.2
+    , sigma = 0.7
     , maskRay = 0.8
     , threashold = 0.7
     }
